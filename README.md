@@ -1,11 +1,11 @@
-# octree primal dual network
-This repo contains the code for my master thesis "learn semantic 3D reconstruction on octree"
+# Octree Primal Dual network
+This repo contains the code for my master thesis "learn semantic 3D reconstruction on octree". It includes the code for conv/deconv on octree in include/ and src/, as well as other layers for primal dual update. It also contains the code for octree/dense voxel grid conversion in tools/.
 
 # Build
-This code is build upon the caffe framework, and thus you can build it using CMake the same way as in caffe. 
-mkdir build && cd build
-make all
-make install
+This code is built upon the caffe framework, and thus you can build it using CMake the same way as in caffe. 
+1. mkdir build && cd build
+2. make all
+3. make install
 
 # Training
 run_scannet_v2 and run_suncg provides two examples on how to use the code to do training and testing.
