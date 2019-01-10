@@ -1,0 +1,5666 @@
+name: "prop_pred_levels_3_iters_50_10_10"
+layer {
+  name: "input_datacost"
+  type: "OctInput"
+  top: "datacost"
+  oct_input_param {
+    batch_size: 1
+    source: "/home/xiaojwan/thesis/experiment/octree_primal_dual/run_scannet_v2/test_datacost_oct.txt"
+    num_classes: 42
+    preload_data: false
+  }
+}
+layer {
+  name: "init_variable"
+  type: "OctInputPrimalDual"
+  top: "u"
+  top: "u_"
+  top: "m"
+  top: "l"
+  top: "num"
+  top: "nbh"
+  top: "nbh_of"
+  oct_input_primal_dual_param {
+    batch_size: 1
+    num_classes: 42
+    height: 32
+    width: 32
+    depth: 32
+    nbh_size: 3
+  }
+}
+layer {
+  name: "datacost_lam"
+  type: "Scaling"
+  bottom: "datacost"
+  top: "datacost_lam"
+  scaling_param {
+    scale: 1.0
+  }
+}
+layer {
+  name: "datacost_prep0"
+  type: "OctLevelSampling"
+  bottom: "datacost_lam"
+  bottom: "u"
+  top: "datacost_prep0"
+  oct_level_sampling_param {
+    input_key_layer: "input_datacost"
+    ref_key_layer: "init_variable"
+    input_max_level: 7
+  }
+}
+layer {
+  name: "conv0_l0"
+  type: "OctConv"
+  bottom: "datacost_prep0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "conv0_l0"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv0_l0_relu"
+  type: "ReLU"
+  bottom: "conv0_l0"
+  top: "conv0_l0"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv1_l0"
+  type: "OctConv"
+  bottom: "conv0_l0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "conv1_l0"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv1_l0_relu"
+  type: "ReLU"
+  bottom: "conv1_l0"
+  top: "conv1_l0"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv2_l0"
+  type: "OctConv"
+  bottom: "conv1_l0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "conv2_l0"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "datacost_adding0"
+  type: "Eltwise"
+  bottom: "datacost_prep0"
+  bottom: "conv2_l0"
+  top: "datacost_adding0"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "dual_update_0_0"
+  type: "OctDualUpdate"
+  bottom: "m"
+  bottom: "u_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_0"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_0"
+  type: "OctLagrangianUpdate"
+  bottom: "l"
+  bottom: "u_"
+  top: "l_0_0"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_0"
+  type: "OctPrimalUpdate"
+  bottom: "u"
+  bottom: "m_0_0"
+  bottom: "l_0_0"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_0"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_0"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_0"
+  bottom: "u"
+  top: "u_0_0_"
+}
+layer {
+  name: "dual_update_0_1"
+  type: "OctDualUpdate"
+  bottom: "m_0_0"
+  bottom: "u_0_0_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_1"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_1"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_0"
+  bottom: "u_0_0_"
+  top: "l_0_1"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_1"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_0"
+  bottom: "m_0_1"
+  bottom: "l_0_1"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_1"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_1"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_1"
+  bottom: "u_0_0"
+  top: "u_0_1_"
+}
+layer {
+  name: "dual_update_0_2"
+  type: "OctDualUpdate"
+  bottom: "m_0_1"
+  bottom: "u_0_1_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_2"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_2"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_1"
+  bottom: "u_0_1_"
+  top: "l_0_2"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_2"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_1"
+  bottom: "m_0_2"
+  bottom: "l_0_2"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_2"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_2"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_2"
+  bottom: "u_0_1"
+  top: "u_0_2_"
+}
+layer {
+  name: "dual_update_0_3"
+  type: "OctDualUpdate"
+  bottom: "m_0_2"
+  bottom: "u_0_2_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_3"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_3"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_2"
+  bottom: "u_0_2_"
+  top: "l_0_3"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_3"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_2"
+  bottom: "m_0_3"
+  bottom: "l_0_3"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_3"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_3"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_3"
+  bottom: "u_0_2"
+  top: "u_0_3_"
+}
+layer {
+  name: "dual_update_0_4"
+  type: "OctDualUpdate"
+  bottom: "m_0_3"
+  bottom: "u_0_3_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_4"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_4"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_3"
+  bottom: "u_0_3_"
+  top: "l_0_4"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_4"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_3"
+  bottom: "m_0_4"
+  bottom: "l_0_4"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_4"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_4"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_4"
+  bottom: "u_0_3"
+  top: "u_0_4_"
+}
+layer {
+  name: "dual_update_0_5"
+  type: "OctDualUpdate"
+  bottom: "m_0_4"
+  bottom: "u_0_4_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_5"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_5"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_4"
+  bottom: "u_0_4_"
+  top: "l_0_5"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_5"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_4"
+  bottom: "m_0_5"
+  bottom: "l_0_5"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_5"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_5"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_5"
+  bottom: "u_0_4"
+  top: "u_0_5_"
+}
+layer {
+  name: "dual_update_0_6"
+  type: "OctDualUpdate"
+  bottom: "m_0_5"
+  bottom: "u_0_5_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_6"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_6"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_5"
+  bottom: "u_0_5_"
+  top: "l_0_6"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_6"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_5"
+  bottom: "m_0_6"
+  bottom: "l_0_6"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_6"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_6"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_6"
+  bottom: "u_0_5"
+  top: "u_0_6_"
+}
+layer {
+  name: "dual_update_0_7"
+  type: "OctDualUpdate"
+  bottom: "m_0_6"
+  bottom: "u_0_6_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_7"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_7"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_6"
+  bottom: "u_0_6_"
+  top: "l_0_7"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_7"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_6"
+  bottom: "m_0_7"
+  bottom: "l_0_7"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_7"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_7"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_7"
+  bottom: "u_0_6"
+  top: "u_0_7_"
+}
+layer {
+  name: "dual_update_0_8"
+  type: "OctDualUpdate"
+  bottom: "m_0_7"
+  bottom: "u_0_7_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_8"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_8"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_7"
+  bottom: "u_0_7_"
+  top: "l_0_8"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_8"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_7"
+  bottom: "m_0_8"
+  bottom: "l_0_8"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_8"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_8"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_8"
+  bottom: "u_0_7"
+  top: "u_0_8_"
+}
+layer {
+  name: "dual_update_0_9"
+  type: "OctDualUpdate"
+  bottom: "m_0_8"
+  bottom: "u_0_8_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_9"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_9"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_8"
+  bottom: "u_0_8_"
+  top: "l_0_9"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_9"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_8"
+  bottom: "m_0_9"
+  bottom: "l_0_9"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_9"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_9"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_9"
+  bottom: "u_0_8"
+  top: "u_0_9_"
+}
+layer {
+  name: "dual_update_0_10"
+  type: "OctDualUpdate"
+  bottom: "m_0_9"
+  bottom: "u_0_9_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_10"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_10"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_9"
+  bottom: "u_0_9_"
+  top: "l_0_10"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_10"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_9"
+  bottom: "m_0_10"
+  bottom: "l_0_10"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_10"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_10"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_10"
+  bottom: "u_0_9"
+  top: "u_0_10_"
+}
+layer {
+  name: "dual_update_0_11"
+  type: "OctDualUpdate"
+  bottom: "m_0_10"
+  bottom: "u_0_10_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_11"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_11"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_10"
+  bottom: "u_0_10_"
+  top: "l_0_11"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_11"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_10"
+  bottom: "m_0_11"
+  bottom: "l_0_11"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_11"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_11"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_11"
+  bottom: "u_0_10"
+  top: "u_0_11_"
+}
+layer {
+  name: "dual_update_0_12"
+  type: "OctDualUpdate"
+  bottom: "m_0_11"
+  bottom: "u_0_11_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_12"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_12"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_11"
+  bottom: "u_0_11_"
+  top: "l_0_12"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_12"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_11"
+  bottom: "m_0_12"
+  bottom: "l_0_12"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_12"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_12"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_12"
+  bottom: "u_0_11"
+  top: "u_0_12_"
+}
+layer {
+  name: "dual_update_0_13"
+  type: "OctDualUpdate"
+  bottom: "m_0_12"
+  bottom: "u_0_12_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_13"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_13"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_12"
+  bottom: "u_0_12_"
+  top: "l_0_13"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_13"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_12"
+  bottom: "m_0_13"
+  bottom: "l_0_13"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_13"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_13"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_13"
+  bottom: "u_0_12"
+  top: "u_0_13_"
+}
+layer {
+  name: "dual_update_0_14"
+  type: "OctDualUpdate"
+  bottom: "m_0_13"
+  bottom: "u_0_13_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_14"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_14"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_13"
+  bottom: "u_0_13_"
+  top: "l_0_14"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_14"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_13"
+  bottom: "m_0_14"
+  bottom: "l_0_14"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_14"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_14"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_14"
+  bottom: "u_0_13"
+  top: "u_0_14_"
+}
+layer {
+  name: "dual_update_0_15"
+  type: "OctDualUpdate"
+  bottom: "m_0_14"
+  bottom: "u_0_14_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_15"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_15"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_14"
+  bottom: "u_0_14_"
+  top: "l_0_15"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_15"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_14"
+  bottom: "m_0_15"
+  bottom: "l_0_15"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_15"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_15"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_15"
+  bottom: "u_0_14"
+  top: "u_0_15_"
+}
+layer {
+  name: "dual_update_0_16"
+  type: "OctDualUpdate"
+  bottom: "m_0_15"
+  bottom: "u_0_15_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_16"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_16"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_15"
+  bottom: "u_0_15_"
+  top: "l_0_16"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_16"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_15"
+  bottom: "m_0_16"
+  bottom: "l_0_16"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_16"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_16"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_16"
+  bottom: "u_0_15"
+  top: "u_0_16_"
+}
+layer {
+  name: "dual_update_0_17"
+  type: "OctDualUpdate"
+  bottom: "m_0_16"
+  bottom: "u_0_16_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_17"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_17"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_16"
+  bottom: "u_0_16_"
+  top: "l_0_17"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_17"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_16"
+  bottom: "m_0_17"
+  bottom: "l_0_17"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_17"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_17"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_17"
+  bottom: "u_0_16"
+  top: "u_0_17_"
+}
+layer {
+  name: "dual_update_0_18"
+  type: "OctDualUpdate"
+  bottom: "m_0_17"
+  bottom: "u_0_17_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_18"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_18"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_17"
+  bottom: "u_0_17_"
+  top: "l_0_18"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_18"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_17"
+  bottom: "m_0_18"
+  bottom: "l_0_18"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_18"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_18"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_18"
+  bottom: "u_0_17"
+  top: "u_0_18_"
+}
+layer {
+  name: "dual_update_0_19"
+  type: "OctDualUpdate"
+  bottom: "m_0_18"
+  bottom: "u_0_18_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_19"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_19"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_18"
+  bottom: "u_0_18_"
+  top: "l_0_19"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_19"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_18"
+  bottom: "m_0_19"
+  bottom: "l_0_19"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_19"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_19"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_19"
+  bottom: "u_0_18"
+  top: "u_0_19_"
+}
+layer {
+  name: "dual_update_0_20"
+  type: "OctDualUpdate"
+  bottom: "m_0_19"
+  bottom: "u_0_19_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_20"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_20"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_19"
+  bottom: "u_0_19_"
+  top: "l_0_20"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_20"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_19"
+  bottom: "m_0_20"
+  bottom: "l_0_20"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_20"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_20"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_20"
+  bottom: "u_0_19"
+  top: "u_0_20_"
+}
+layer {
+  name: "dual_update_0_21"
+  type: "OctDualUpdate"
+  bottom: "m_0_20"
+  bottom: "u_0_20_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_21"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_21"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_20"
+  bottom: "u_0_20_"
+  top: "l_0_21"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_21"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_20"
+  bottom: "m_0_21"
+  bottom: "l_0_21"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_21"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_21"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_21"
+  bottom: "u_0_20"
+  top: "u_0_21_"
+}
+layer {
+  name: "dual_update_0_22"
+  type: "OctDualUpdate"
+  bottom: "m_0_21"
+  bottom: "u_0_21_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_22"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_22"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_21"
+  bottom: "u_0_21_"
+  top: "l_0_22"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_22"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_21"
+  bottom: "m_0_22"
+  bottom: "l_0_22"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_22"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_22"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_22"
+  bottom: "u_0_21"
+  top: "u_0_22_"
+}
+layer {
+  name: "dual_update_0_23"
+  type: "OctDualUpdate"
+  bottom: "m_0_22"
+  bottom: "u_0_22_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_23"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_23"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_22"
+  bottom: "u_0_22_"
+  top: "l_0_23"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_23"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_22"
+  bottom: "m_0_23"
+  bottom: "l_0_23"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_23"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_23"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_23"
+  bottom: "u_0_22"
+  top: "u_0_23_"
+}
+layer {
+  name: "dual_update_0_24"
+  type: "OctDualUpdate"
+  bottom: "m_0_23"
+  bottom: "u_0_23_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_24"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_24"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_23"
+  bottom: "u_0_23_"
+  top: "l_0_24"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_24"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_23"
+  bottom: "m_0_24"
+  bottom: "l_0_24"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_24"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_24"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_24"
+  bottom: "u_0_23"
+  top: "u_0_24_"
+}
+layer {
+  name: "dual_update_0_25"
+  type: "OctDualUpdate"
+  bottom: "m_0_24"
+  bottom: "u_0_24_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_25"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_25"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_24"
+  bottom: "u_0_24_"
+  top: "l_0_25"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_25"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_24"
+  bottom: "m_0_25"
+  bottom: "l_0_25"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_25"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_25"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_25"
+  bottom: "u_0_24"
+  top: "u_0_25_"
+}
+layer {
+  name: "dual_update_0_26"
+  type: "OctDualUpdate"
+  bottom: "m_0_25"
+  bottom: "u_0_25_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_26"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_26"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_25"
+  bottom: "u_0_25_"
+  top: "l_0_26"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_26"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_25"
+  bottom: "m_0_26"
+  bottom: "l_0_26"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_26"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_26"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_26"
+  bottom: "u_0_25"
+  top: "u_0_26_"
+}
+layer {
+  name: "dual_update_0_27"
+  type: "OctDualUpdate"
+  bottom: "m_0_26"
+  bottom: "u_0_26_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_27"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_27"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_26"
+  bottom: "u_0_26_"
+  top: "l_0_27"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_27"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_26"
+  bottom: "m_0_27"
+  bottom: "l_0_27"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_27"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_27"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_27"
+  bottom: "u_0_26"
+  top: "u_0_27_"
+}
+layer {
+  name: "dual_update_0_28"
+  type: "OctDualUpdate"
+  bottom: "m_0_27"
+  bottom: "u_0_27_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_28"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_28"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_27"
+  bottom: "u_0_27_"
+  top: "l_0_28"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_28"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_27"
+  bottom: "m_0_28"
+  bottom: "l_0_28"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_28"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_28"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_28"
+  bottom: "u_0_27"
+  top: "u_0_28_"
+}
+layer {
+  name: "dual_update_0_29"
+  type: "OctDualUpdate"
+  bottom: "m_0_28"
+  bottom: "u_0_28_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_29"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_29"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_28"
+  bottom: "u_0_28_"
+  top: "l_0_29"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_29"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_28"
+  bottom: "m_0_29"
+  bottom: "l_0_29"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_29"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_29"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_29"
+  bottom: "u_0_28"
+  top: "u_0_29_"
+}
+layer {
+  name: "dual_update_0_30"
+  type: "OctDualUpdate"
+  bottom: "m_0_29"
+  bottom: "u_0_29_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_30"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_30"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_29"
+  bottom: "u_0_29_"
+  top: "l_0_30"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_30"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_29"
+  bottom: "m_0_30"
+  bottom: "l_0_30"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_30"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_30"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_30"
+  bottom: "u_0_29"
+  top: "u_0_30_"
+}
+layer {
+  name: "dual_update_0_31"
+  type: "OctDualUpdate"
+  bottom: "m_0_30"
+  bottom: "u_0_30_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_31"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_31"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_30"
+  bottom: "u_0_30_"
+  top: "l_0_31"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_31"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_30"
+  bottom: "m_0_31"
+  bottom: "l_0_31"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_31"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_31"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_31"
+  bottom: "u_0_30"
+  top: "u_0_31_"
+}
+layer {
+  name: "dual_update_0_32"
+  type: "OctDualUpdate"
+  bottom: "m_0_31"
+  bottom: "u_0_31_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_32"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_32"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_31"
+  bottom: "u_0_31_"
+  top: "l_0_32"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_32"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_31"
+  bottom: "m_0_32"
+  bottom: "l_0_32"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_32"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_32"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_32"
+  bottom: "u_0_31"
+  top: "u_0_32_"
+}
+layer {
+  name: "dual_update_0_33"
+  type: "OctDualUpdate"
+  bottom: "m_0_32"
+  bottom: "u_0_32_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_33"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_33"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_32"
+  bottom: "u_0_32_"
+  top: "l_0_33"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_33"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_32"
+  bottom: "m_0_33"
+  bottom: "l_0_33"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_33"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_33"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_33"
+  bottom: "u_0_32"
+  top: "u_0_33_"
+}
+layer {
+  name: "dual_update_0_34"
+  type: "OctDualUpdate"
+  bottom: "m_0_33"
+  bottom: "u_0_33_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_34"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_34"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_33"
+  bottom: "u_0_33_"
+  top: "l_0_34"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_34"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_33"
+  bottom: "m_0_34"
+  bottom: "l_0_34"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_34"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_34"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_34"
+  bottom: "u_0_33"
+  top: "u_0_34_"
+}
+layer {
+  name: "dual_update_0_35"
+  type: "OctDualUpdate"
+  bottom: "m_0_34"
+  bottom: "u_0_34_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_35"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_35"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_34"
+  bottom: "u_0_34_"
+  top: "l_0_35"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_35"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_34"
+  bottom: "m_0_35"
+  bottom: "l_0_35"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_35"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_35"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_35"
+  bottom: "u_0_34"
+  top: "u_0_35_"
+}
+layer {
+  name: "dual_update_0_36"
+  type: "OctDualUpdate"
+  bottom: "m_0_35"
+  bottom: "u_0_35_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_36"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_36"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_35"
+  bottom: "u_0_35_"
+  top: "l_0_36"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_36"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_35"
+  bottom: "m_0_36"
+  bottom: "l_0_36"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_36"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_36"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_36"
+  bottom: "u_0_35"
+  top: "u_0_36_"
+}
+layer {
+  name: "dual_update_0_37"
+  type: "OctDualUpdate"
+  bottom: "m_0_36"
+  bottom: "u_0_36_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_37"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_37"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_36"
+  bottom: "u_0_36_"
+  top: "l_0_37"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_37"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_36"
+  bottom: "m_0_37"
+  bottom: "l_0_37"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_37"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_37"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_37"
+  bottom: "u_0_36"
+  top: "u_0_37_"
+}
+layer {
+  name: "dual_update_0_38"
+  type: "OctDualUpdate"
+  bottom: "m_0_37"
+  bottom: "u_0_37_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_38"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_38"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_37"
+  bottom: "u_0_37_"
+  top: "l_0_38"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_38"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_37"
+  bottom: "m_0_38"
+  bottom: "l_0_38"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_38"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_38"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_38"
+  bottom: "u_0_37"
+  top: "u_0_38_"
+}
+layer {
+  name: "dual_update_0_39"
+  type: "OctDualUpdate"
+  bottom: "m_0_38"
+  bottom: "u_0_38_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_39"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_39"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_38"
+  bottom: "u_0_38_"
+  top: "l_0_39"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_39"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_38"
+  bottom: "m_0_39"
+  bottom: "l_0_39"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_39"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_39"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_39"
+  bottom: "u_0_38"
+  top: "u_0_39_"
+}
+layer {
+  name: "dual_update_0_40"
+  type: "OctDualUpdate"
+  bottom: "m_0_39"
+  bottom: "u_0_39_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_40"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_40"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_39"
+  bottom: "u_0_39_"
+  top: "l_0_40"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_40"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_39"
+  bottom: "m_0_40"
+  bottom: "l_0_40"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_40"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_40"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_40"
+  bottom: "u_0_39"
+  top: "u_0_40_"
+}
+layer {
+  name: "dual_update_0_41"
+  type: "OctDualUpdate"
+  bottom: "m_0_40"
+  bottom: "u_0_40_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_41"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_41"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_40"
+  bottom: "u_0_40_"
+  top: "l_0_41"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_41"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_40"
+  bottom: "m_0_41"
+  bottom: "l_0_41"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_41"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_41"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_41"
+  bottom: "u_0_40"
+  top: "u_0_41_"
+}
+layer {
+  name: "dual_update_0_42"
+  type: "OctDualUpdate"
+  bottom: "m_0_41"
+  bottom: "u_0_41_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_42"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_42"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_41"
+  bottom: "u_0_41_"
+  top: "l_0_42"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_42"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_41"
+  bottom: "m_0_42"
+  bottom: "l_0_42"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_42"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_42"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_42"
+  bottom: "u_0_41"
+  top: "u_0_42_"
+}
+layer {
+  name: "dual_update_0_43"
+  type: "OctDualUpdate"
+  bottom: "m_0_42"
+  bottom: "u_0_42_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_43"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_43"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_42"
+  bottom: "u_0_42_"
+  top: "l_0_43"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_43"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_42"
+  bottom: "m_0_43"
+  bottom: "l_0_43"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_43"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_43"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_43"
+  bottom: "u_0_42"
+  top: "u_0_43_"
+}
+layer {
+  name: "dual_update_0_44"
+  type: "OctDualUpdate"
+  bottom: "m_0_43"
+  bottom: "u_0_43_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_44"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_44"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_43"
+  bottom: "u_0_43_"
+  top: "l_0_44"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_44"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_43"
+  bottom: "m_0_44"
+  bottom: "l_0_44"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_44"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_44"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_44"
+  bottom: "u_0_43"
+  top: "u_0_44_"
+}
+layer {
+  name: "dual_update_0_45"
+  type: "OctDualUpdate"
+  bottom: "m_0_44"
+  bottom: "u_0_44_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_45"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_45"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_44"
+  bottom: "u_0_44_"
+  top: "l_0_45"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_45"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_44"
+  bottom: "m_0_45"
+  bottom: "l_0_45"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_45"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_45"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_45"
+  bottom: "u_0_44"
+  top: "u_0_45_"
+}
+layer {
+  name: "dual_update_0_46"
+  type: "OctDualUpdate"
+  bottom: "m_0_45"
+  bottom: "u_0_45_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_46"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_46"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_45"
+  bottom: "u_0_45_"
+  top: "l_0_46"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_46"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_45"
+  bottom: "m_0_46"
+  bottom: "l_0_46"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_46"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_46"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_46"
+  bottom: "u_0_45"
+  top: "u_0_46_"
+}
+layer {
+  name: "dual_update_0_47"
+  type: "OctDualUpdate"
+  bottom: "m_0_46"
+  bottom: "u_0_46_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_47"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_47"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_46"
+  bottom: "u_0_46_"
+  top: "l_0_47"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_47"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_46"
+  bottom: "m_0_47"
+  bottom: "l_0_47"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_47"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_47"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_47"
+  bottom: "u_0_46"
+  top: "u_0_47_"
+}
+layer {
+  name: "dual_update_0_48"
+  type: "OctDualUpdate"
+  bottom: "m_0_47"
+  bottom: "u_0_47_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_48"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_48"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_47"
+  bottom: "u_0_47_"
+  top: "l_0_48"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_48"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_47"
+  bottom: "m_0_48"
+  bottom: "l_0_48"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_48"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_48"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_48"
+  bottom: "u_0_47"
+  top: "u_0_48_"
+}
+layer {
+  name: "dual_update_0_49"
+  type: "OctDualUpdate"
+  bottom: "m_0_48"
+  bottom: "u_0_48_"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "m_0_49"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_0_49"
+  type: "OctLagrangianUpdate"
+  bottom: "l_0_48"
+  bottom: "u_0_48_"
+  top: "l_0_49"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_0_49"
+  type: "OctPrimalUpdate"
+  bottom: "u_0_48"
+  bottom: "m_0_49"
+  bottom: "l_0_49"
+  bottom: "datacost_adding0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "u_0_49"
+  param {
+    name: "primal_dual_weight0"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_0_49"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_0_49"
+  bottom: "u_0_48"
+  top: "u_0_49_"
+}
+layer {
+  name: "conv3_l0"
+  type: "OctConv"
+  bottom: "u_0_49"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "conv3_l0"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv3_l0_relu"
+  type: "ReLU"
+  bottom: "conv3_l0"
+  top: "conv3_l0"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv4_l0"
+  type: "OctConv"
+  bottom: "conv3_l0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "conv4_l0"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv4_l0_relu"
+  type: "ReLU"
+  bottom: "conv4_l0"
+  top: "conv4_l0"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv5_l0"
+  type: "OctConv"
+  bottom: "conv4_l0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "conv5_l0"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "u_scaling0"
+  type: "Scaling"
+  bottom: "u_0_49"
+  top: "u_scaling0"
+  scaling_param {
+    scale: 10.0
+  }
+}
+layer {
+  name: "u_adding0"
+  type: "Eltwise"
+  bottom: "u_scaling0"
+  bottom: "conv5_l0"
+  top: "u_adding0"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "seg_prob0"
+  type: "Softmax"
+  bottom: "u_adding0"
+  top: "seg_prob0"
+  softmax_param {
+    axis: 1
+  }
+}
+layer {
+  name: "prop_prob0"
+  type: "OctConv"
+  bottom: "seg_prob0"
+  bottom: "num"
+  bottom: "nbh"
+  bottom: "nbh_of"
+  top: "prop_prob0"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "prop_prob0_sig"
+  type: "Sigmoid"
+  bottom: "prop_prob0"
+  top: "prop_prob0_sig"
+  sigmoid_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "prop0"
+  type: "OctProp"
+  bottom: "u_0_49"
+  bottom: "u_0_49_"
+  bottom: "m_0_49"
+  bottom: "l_0_49"
+  bottom: "prop_prob0_sig"
+  top: "u_prop0"
+  top: "u_prop0_"
+  top: "m_prop0"
+  top: "l_prop0"
+  oct_prop_param {
+    key_layer: "init_variable"
+    prop_mode: PROP_PRED
+  }
+}
+layer {
+  name: "up_sampling0"
+  type: "OctUpSampling"
+  bottom: "u_prop0"
+  bottom: "u_prop0_"
+  bottom: "m_prop0"
+  bottom: "l_prop0"
+  top: "u_upsampling0"
+  top: "u_upsampling0_"
+  top: "m_upsampling0"
+  top: "l_upsampling0"
+  top: "num_upsampling0"
+  top: "nbh_upsampling0"
+  top: "nbh_of_upsampling0"
+  oct_upsampling_param {
+    key_layer: "prop0"
+    nbh_size: 3
+  }
+}
+layer {
+  name: "datacost_prep1"
+  type: "OctLevelSampling"
+  bottom: "datacost_lam"
+  bottom: "u_upsampling0"
+  top: "datacost_prep1"
+  oct_level_sampling_param {
+    input_key_layer: "input_datacost"
+    ref_key_layer: "up_sampling0"
+    input_max_level: 7
+  }
+}
+layer {
+  name: "conv0_l1"
+  type: "OctConv"
+  bottom: "datacost_prep1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "conv0_l1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv0_l1_relu"
+  type: "ReLU"
+  bottom: "conv0_l1"
+  top: "conv0_l1"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv1_l1"
+  type: "OctConv"
+  bottom: "conv0_l1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "conv1_l1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv1_l1_relu"
+  type: "ReLU"
+  bottom: "conv1_l1"
+  top: "conv1_l1"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv2_l1"
+  type: "OctConv"
+  bottom: "conv1_l1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "conv2_l1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "datacost_adding1"
+  type: "Eltwise"
+  bottom: "datacost_prep1"
+  bottom: "conv2_l1"
+  top: "datacost_adding1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "dual_update_1_0"
+  type: "OctDualUpdate"
+  bottom: "m_upsampling0"
+  bottom: "u_upsampling0_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_0"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_0"
+  type: "OctLagrangianUpdate"
+  bottom: "l_upsampling0"
+  bottom: "u_upsampling0_"
+  top: "l_1_0"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_0"
+  type: "OctPrimalUpdate"
+  bottom: "u_upsampling0"
+  bottom: "m_1_0"
+  bottom: "l_1_0"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_0"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_0"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_0"
+  bottom: "u_upsampling0"
+  top: "u_1_0_"
+}
+layer {
+  name: "dual_update_1_1"
+  type: "OctDualUpdate"
+  bottom: "m_1_0"
+  bottom: "u_1_0_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_1"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_1"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_0"
+  bottom: "u_1_0_"
+  top: "l_1_1"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_1"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_0"
+  bottom: "m_1_1"
+  bottom: "l_1_1"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_1"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_1"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_1"
+  bottom: "u_1_0"
+  top: "u_1_1_"
+}
+layer {
+  name: "dual_update_1_2"
+  type: "OctDualUpdate"
+  bottom: "m_1_1"
+  bottom: "u_1_1_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_2"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_2"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_1"
+  bottom: "u_1_1_"
+  top: "l_1_2"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_2"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_1"
+  bottom: "m_1_2"
+  bottom: "l_1_2"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_2"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_2"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_2"
+  bottom: "u_1_1"
+  top: "u_1_2_"
+}
+layer {
+  name: "dual_update_1_3"
+  type: "OctDualUpdate"
+  bottom: "m_1_2"
+  bottom: "u_1_2_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_3"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_3"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_2"
+  bottom: "u_1_2_"
+  top: "l_1_3"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_3"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_2"
+  bottom: "m_1_3"
+  bottom: "l_1_3"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_3"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_3"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_3"
+  bottom: "u_1_2"
+  top: "u_1_3_"
+}
+layer {
+  name: "dual_update_1_4"
+  type: "OctDualUpdate"
+  bottom: "m_1_3"
+  bottom: "u_1_3_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_4"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_4"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_3"
+  bottom: "u_1_3_"
+  top: "l_1_4"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_4"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_3"
+  bottom: "m_1_4"
+  bottom: "l_1_4"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_4"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_4"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_4"
+  bottom: "u_1_3"
+  top: "u_1_4_"
+}
+layer {
+  name: "dual_update_1_5"
+  type: "OctDualUpdate"
+  bottom: "m_1_4"
+  bottom: "u_1_4_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_5"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_5"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_4"
+  bottom: "u_1_4_"
+  top: "l_1_5"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_5"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_4"
+  bottom: "m_1_5"
+  bottom: "l_1_5"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_5"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_5"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_5"
+  bottom: "u_1_4"
+  top: "u_1_5_"
+}
+layer {
+  name: "dual_update_1_6"
+  type: "OctDualUpdate"
+  bottom: "m_1_5"
+  bottom: "u_1_5_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_6"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_6"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_5"
+  bottom: "u_1_5_"
+  top: "l_1_6"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_6"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_5"
+  bottom: "m_1_6"
+  bottom: "l_1_6"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_6"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_6"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_6"
+  bottom: "u_1_5"
+  top: "u_1_6_"
+}
+layer {
+  name: "dual_update_1_7"
+  type: "OctDualUpdate"
+  bottom: "m_1_6"
+  bottom: "u_1_6_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_7"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_7"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_6"
+  bottom: "u_1_6_"
+  top: "l_1_7"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_7"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_6"
+  bottom: "m_1_7"
+  bottom: "l_1_7"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_7"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_7"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_7"
+  bottom: "u_1_6"
+  top: "u_1_7_"
+}
+layer {
+  name: "dual_update_1_8"
+  type: "OctDualUpdate"
+  bottom: "m_1_7"
+  bottom: "u_1_7_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_8"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_8"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_7"
+  bottom: "u_1_7_"
+  top: "l_1_8"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_8"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_7"
+  bottom: "m_1_8"
+  bottom: "l_1_8"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_8"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_8"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_8"
+  bottom: "u_1_7"
+  top: "u_1_8_"
+}
+layer {
+  name: "dual_update_1_9"
+  type: "OctDualUpdate"
+  bottom: "m_1_8"
+  bottom: "u_1_8_"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "m_1_9"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_1_9"
+  type: "OctLagrangianUpdate"
+  bottom: "l_1_8"
+  bottom: "u_1_8_"
+  top: "l_1_9"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_1_9"
+  type: "OctPrimalUpdate"
+  bottom: "u_1_8"
+  bottom: "m_1_9"
+  bottom: "l_1_9"
+  bottom: "datacost_adding1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "u_1_9"
+  param {
+    name: "primal_dual_weight1"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_1_9"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_1_9"
+  bottom: "u_1_8"
+  top: "u_1_9_"
+}
+layer {
+  name: "conv3_l1"
+  type: "OctConv"
+  bottom: "u_1_9"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "conv3_l1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv3_l1_relu"
+  type: "ReLU"
+  bottom: "conv3_l1"
+  top: "conv3_l1"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv4_l1"
+  type: "OctConv"
+  bottom: "conv3_l1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "conv4_l1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv4_l1_relu"
+  type: "ReLU"
+  bottom: "conv4_l1"
+  top: "conv4_l1"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv5_l1"
+  type: "OctConv"
+  bottom: "conv4_l1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "conv5_l1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "u_scaling1"
+  type: "Scaling"
+  bottom: "u_1_9"
+  top: "u_scaling1"
+  scaling_param {
+    scale: 10.0
+  }
+}
+layer {
+  name: "u_adding1"
+  type: "Eltwise"
+  bottom: "u_scaling1"
+  bottom: "conv5_l1"
+  top: "u_adding1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "seg_prob1"
+  type: "Softmax"
+  bottom: "u_adding1"
+  top: "seg_prob1"
+  softmax_param {
+    axis: 1
+  }
+}
+layer {
+  name: "prop_prob1"
+  type: "OctConv"
+  bottom: "seg_prob1"
+  bottom: "num_upsampling0"
+  bottom: "nbh_upsampling0"
+  bottom: "nbh_of_upsampling0"
+  top: "prop_prob1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "prop_prob1_sig"
+  type: "Sigmoid"
+  bottom: "prop_prob1"
+  top: "prop_prob1_sig"
+  sigmoid_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "prop1"
+  type: "OctProp"
+  bottom: "u_1_9"
+  bottom: "u_1_9_"
+  bottom: "m_1_9"
+  bottom: "l_1_9"
+  bottom: "prop_prob1_sig"
+  top: "u_prop1"
+  top: "u_prop1_"
+  top: "m_prop1"
+  top: "l_prop1"
+  oct_prop_param {
+    key_layer: "up_sampling0"
+    prop_mode: PROP_PRED
+  }
+}
+layer {
+  name: "up_sampling1"
+  type: "OctUpSampling"
+  bottom: "u_prop1"
+  bottom: "u_prop1_"
+  bottom: "m_prop1"
+  bottom: "l_prop1"
+  top: "u_upsampling1"
+  top: "u_upsampling1_"
+  top: "m_upsampling1"
+  top: "l_upsampling1"
+  top: "num_upsampling1"
+  top: "nbh_upsampling1"
+  top: "nbh_of_upsampling1"
+  oct_upsampling_param {
+    key_layer: "prop1"
+    nbh_size: 3
+  }
+}
+layer {
+  name: "datacost_prep2"
+  type: "OctLevelSampling"
+  bottom: "datacost_lam"
+  bottom: "u_upsampling1"
+  top: "datacost_prep2"
+  oct_level_sampling_param {
+    input_key_layer: "input_datacost"
+    ref_key_layer: "up_sampling1"
+    input_max_level: 7
+  }
+}
+layer {
+  name: "conv0_l2"
+  type: "OctConv"
+  bottom: "datacost_prep2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "conv0_l2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv0_l2_relu"
+  type: "ReLU"
+  bottom: "conv0_l2"
+  top: "conv0_l2"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv1_l2"
+  type: "OctConv"
+  bottom: "conv0_l2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "conv1_l2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv1_l2_relu"
+  type: "ReLU"
+  bottom: "conv1_l2"
+  top: "conv1_l2"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv2_l2"
+  type: "OctConv"
+  bottom: "conv1_l2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "conv2_l2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.00999999977648
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "datacost_adding2"
+  type: "Eltwise"
+  bottom: "datacost_prep2"
+  bottom: "conv2_l2"
+  top: "datacost_adding2"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "dual_update_2_0"
+  type: "OctDualUpdate"
+  bottom: "m_upsampling1"
+  bottom: "u_upsampling1_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_0"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_0"
+  type: "OctLagrangianUpdate"
+  bottom: "l_upsampling1"
+  bottom: "u_upsampling1_"
+  top: "l_2_0"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_0"
+  type: "OctPrimalUpdate"
+  bottom: "u_upsampling1"
+  bottom: "m_2_0"
+  bottom: "l_2_0"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_0"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_0"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_0"
+  bottom: "u_upsampling1"
+  top: "u_2_0_"
+}
+layer {
+  name: "dual_update_2_1"
+  type: "OctDualUpdate"
+  bottom: "m_2_0"
+  bottom: "u_2_0_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_1"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_1"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_0"
+  bottom: "u_2_0_"
+  top: "l_2_1"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_1"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_0"
+  bottom: "m_2_1"
+  bottom: "l_2_1"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_1"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_1"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_1"
+  bottom: "u_2_0"
+  top: "u_2_1_"
+}
+layer {
+  name: "dual_update_2_2"
+  type: "OctDualUpdate"
+  bottom: "m_2_1"
+  bottom: "u_2_1_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_2"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_2"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_1"
+  bottom: "u_2_1_"
+  top: "l_2_2"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_2"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_1"
+  bottom: "m_2_2"
+  bottom: "l_2_2"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_2"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_2"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_2"
+  bottom: "u_2_1"
+  top: "u_2_2_"
+}
+layer {
+  name: "dual_update_2_3"
+  type: "OctDualUpdate"
+  bottom: "m_2_2"
+  bottom: "u_2_2_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_3"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_3"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_2"
+  bottom: "u_2_2_"
+  top: "l_2_3"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_3"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_2"
+  bottom: "m_2_3"
+  bottom: "l_2_3"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_3"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_3"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_3"
+  bottom: "u_2_2"
+  top: "u_2_3_"
+}
+layer {
+  name: "dual_update_2_4"
+  type: "OctDualUpdate"
+  bottom: "m_2_3"
+  bottom: "u_2_3_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_4"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_4"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_3"
+  bottom: "u_2_3_"
+  top: "l_2_4"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_4"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_3"
+  bottom: "m_2_4"
+  bottom: "l_2_4"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_4"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_4"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_4"
+  bottom: "u_2_3"
+  top: "u_2_4_"
+}
+layer {
+  name: "dual_update_2_5"
+  type: "OctDualUpdate"
+  bottom: "m_2_4"
+  bottom: "u_2_4_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_5"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_5"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_4"
+  bottom: "u_2_4_"
+  top: "l_2_5"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_5"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_4"
+  bottom: "m_2_5"
+  bottom: "l_2_5"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_5"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_5"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_5"
+  bottom: "u_2_4"
+  top: "u_2_5_"
+}
+layer {
+  name: "dual_update_2_6"
+  type: "OctDualUpdate"
+  bottom: "m_2_5"
+  bottom: "u_2_5_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_6"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_6"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_5"
+  bottom: "u_2_5_"
+  top: "l_2_6"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_6"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_5"
+  bottom: "m_2_6"
+  bottom: "l_2_6"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_6"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_6"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_6"
+  bottom: "u_2_5"
+  top: "u_2_6_"
+}
+layer {
+  name: "dual_update_2_7"
+  type: "OctDualUpdate"
+  bottom: "m_2_6"
+  bottom: "u_2_6_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_7"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_7"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_6"
+  bottom: "u_2_6_"
+  top: "l_2_7"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_7"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_6"
+  bottom: "m_2_7"
+  bottom: "l_2_7"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_7"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_7"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_7"
+  bottom: "u_2_6"
+  top: "u_2_7_"
+}
+layer {
+  name: "dual_update_2_8"
+  type: "OctDualUpdate"
+  bottom: "m_2_7"
+  bottom: "u_2_7_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_8"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_8"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_7"
+  bottom: "u_2_7_"
+  top: "l_2_8"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_8"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_7"
+  bottom: "m_2_8"
+  bottom: "l_2_8"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_8"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "primal_further_update_2_8"
+  type: "OctPrimalFurtherUpdate"
+  bottom: "u_2_8"
+  bottom: "u_2_7"
+  top: "u_2_8_"
+}
+layer {
+  name: "dual_update_2_9"
+  type: "OctDualUpdate"
+  bottom: "m_2_8"
+  bottom: "u_2_8_"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "m_2_9"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_dual_update_param {
+    filter_size: 3
+    output_channels: 126
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "lagrangian_update_2_9"
+  type: "OctLagrangianUpdate"
+  bottom: "l_2_8"
+  bottom: "u_2_8_"
+  top: "l_2_9"
+  lagrangian_update_param {
+    sigma: 0.20000000298
+  }
+}
+layer {
+  name: "primal_update_2_9"
+  type: "OctPrimalUpdate"
+  bottom: "u_2_8"
+  bottom: "m_2_9"
+  bottom: "l_2_9"
+  bottom: "datacost_adding2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "u_2_9"
+  param {
+    name: "primal_dual_weight2"
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_primal_update_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.0010000000475
+    }
+    tau: 0.20000000298
+  }
+}
+layer {
+  name: "conv3_l2"
+  type: "OctConv"
+  bottom: "u_2_9"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "conv3_l2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv3_l2_relu"
+  type: "ReLU"
+  bottom: "conv3_l2"
+  top: "conv3_l2"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv4_l2"
+  type: "OctConv"
+  bottom: "conv3_l2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "conv4_l2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "conv4_l2_relu"
+  type: "ReLU"
+  bottom: "conv4_l2"
+  top: "conv4_l2"
+  relu_param {
+    engine: CAFFE
+  }
+}
+layer {
+  name: "conv5_l2"
+  type: "OctConv"
+  bottom: "conv4_l2"
+  bottom: "num_upsampling1"
+  bottom: "nbh_upsampling1"
+  bottom: "nbh_of_upsampling1"
+  top: "conv5_l2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 1.0
+    decay_mult: 0.0
+  }
+  oct_conv_param {
+    filter_size: 3
+    output_channels: 42
+    weight_filler {
+      type: "gaussian"
+      std: 0.10000000149
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layer {
+  name: "u_scaling2"
+  type: "Scaling"
+  bottom: "u_2_9"
+  top: "u_scaling2"
+  scaling_param {
+    scale: 10.0
+  }
+}
+layer {
+  name: "u_adding2"
+  type: "Eltwise"
+  bottom: "u_scaling2"
+  bottom: "conv5_l2"
+  top: "u_adding2"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "seg_prob2"
+  type: "Softmax"
+  bottom: "u_adding2"
+  top: "seg_prob2"
+  softmax_param {
+    axis: 1
+  }
+}
+layer {
+  name: "output_pred"
+  type: "OctOutput"
+  bottom: "seg_prob0"
+  bottom: "prop_prob0_sig"
+  bottom: "seg_prob1"
+  bottom: "prop_prob1_sig"
+  bottom: "seg_prob2"
+  top: "pred"
+  oct_output_param {
+    key_layer: "init_variable"
+    key_layer: "up_sampling0"
+    key_layer: "up_sampling1"
+    min_level: 5
+    prop_mode: PROP_PRED
+  }
+}
+layer {
+  name: "dense_pred"
+  type: "DenseConvert"
+  bottom: "pred"
+  top: "dense_pred"
+  dense_convert_param {
+    key_layer: "output_pred"
+    max_level: 7
+  }
+}
+layer {
+  name: "write"
+  type: "DenseGridDataWrite"
+  bottom: "dense_pred"
+  dense_grid_data_write_param {
+    input_source: "/home/xiaojwan/thesis/experiment/octree_primal_dual/run_scannet_v2/test_datacost_oct.txt"
+  }
+}

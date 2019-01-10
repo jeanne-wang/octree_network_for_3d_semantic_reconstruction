@@ -1,0 +1,42 @@
+0 wall : 176 135 93
+1 floor : 175 183 255
+2 cabinet : 205 255 10
+3 bed : 138 0 123
+4 chair : 139 255 65
+5 sofa : 98 60 1
+6 table : 101 51 111
+7 door : 20 161 106
+8 window : 13 104 166
+9 bookshelf : 15 125 138
+10 picture : 88 84 110
+11 counter : 254 226 10
+12 blinds : 97 44 162
+13 desk : 33 255 253
+14 shelves : 0 14 52
+15 curtain : 253 142 255
+16 dresser : 179 119 141
+17 pillow : 78 8 0
+18 mirror : 6 55 66
+19 floor mat : 254 213 83
+20 clothes : 9 90 254
+21 ceiling : 51 0 33
+22 books : 25 198 255
+23 refridgerator : 224 64 176
+24 television : 128 199 191
+25 paper : 253 126 108
+26 towel : 80 160 61
+27 shower curtain : 11 84 2
+28 box : 255 234 226
+29 whiteboard : 16 133 255
+30 person : 252 0 69
+31 night stand : 176 204 128
+32 toilet : 115 157 4
+33 sink : 129 0 44
+34 lamp : 251 0 140
+35 bathtub : 172 118 5
+36 bag : 23 176 19
+37 otherstructure : 0 0 83
+38 otherfurniture : 0 0 255
+39 otherprop : 251 0 244
+40 unknown : 0 0 0
+41 freespace : 255 0 0
