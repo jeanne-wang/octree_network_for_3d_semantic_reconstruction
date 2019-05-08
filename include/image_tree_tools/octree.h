@@ -20,10 +20,10 @@
 #include "common_util.h"
 
 struct OctreeCoord{
-   Int x;
-   Int y;
-   Int z;
-   Int l;
+   int x;
+   int y;
+   int z;
+   int l;
 };
 
 template <class VALUE>
