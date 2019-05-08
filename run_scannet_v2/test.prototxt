@@ -5,7 +5,18 @@ layer {
   top: "datacost"
   oct_input_param {
     batch_size: 1
-    source: "/home/xiaojwan/thesis/experiment/octree_primal_dual/run_scannet_v2/test_datacost_oct.txt"
+    source: "/home/xiaojwan/thesis/experiment/octree_primal_dual/run_scannet_v2/val_datacost_oct.txt"
+    num_classes: 42
+    preload_data: false
+  }
+}
+layer {
+  name: "input_gt"
+  type: "OctInput"
+  top: "gt"
+  oct_input_param {
+    batch_size: 1
+    source: "/home/xiaojwan/thesis/experiment/octree_primal_dual/run_scannet_v2/val_groundtruth_oct.txt"
     num_classes: 42
     preload_data: false
   }
@@ -5647,6 +5658,22 @@ layer {
   }
 }
 layer {
+  name: "accuracy"
+  type: "OctAccuracy3DReconstruction"
+  bottom: "gt"
+  bottom: "pred"
+  top: "freespace_accuracy"
+  top: "semantic_accuracy"
+  top: "overall_accuracy"
+  oct_accuracy_3dreconstruction_param {
+    freespace_label: 41
+    unknown_label: 40
+    gt_key_layer: "input_gt"
+    pr_key_layer: "output_pred"
+    max_level: 7
+  }
+}
+layer {
   name: "dense_pred"
   type: "DenseConvert"
   bottom: "pred"
@@ -5661,6 +5688,6 @@ layer {
   type: "DenseGridDataWrite"
   bottom: "dense_pred"
   dense_grid_data_write_param {
-    input_source: "/home/xiaojwan/thesis/experiment/octree_primal_dual/run_scannet_v2/test_datacost_oct.txt"
+    input_source: "/home/xiaojwan/thesis/experiment/octree_primal_dual/run_scannet_v2/val_datacost_oct.txt"
   }
 }

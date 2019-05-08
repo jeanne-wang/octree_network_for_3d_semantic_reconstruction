@@ -456,6 +456,26 @@ def OctSegAccuracy(name, tops, bottoms, gt_key_layer, pr_key_layer, max_level, f
 
     return layer
 
+def DenseConvert(name, bottom, max_level, key_layer):
+    layer = caffe_pb2.LayerParameter()
+    layer.name = name
+    layer.type = 'DenseConvert'
+    layer.top.extend([name])
+    layer.bottom.extend([bottom])
+    layer.dense_convert_param.max_level = max_level
+    layer.dense_convert_param.key_layer = key_layer
+
+    return layer
+
+def DenseGridDataWrite(name, bottom, input_source):
+    layer = caffe_pb2.LayerParameter()
+    layer.name = name
+    layer.type = 'DenseGridDataWrite'
+    layer.bottom.extend([bottom])
+    layer.dense_grid_data_write_param.input_source=input_source
+   
+    return layer
+
 
 def create_model(batch_size, num_classes, test_data_list_file, test_groundtruth_list_file, preload_data, 
                 max_level, nlevels, niter_l0, niter_l1, niter_l2, sigma, tau, lam, softmax_scale, 
@@ -514,6 +534,8 @@ def create_model(batch_size, num_classes, test_data_list_file, test_groundtruth_
     layers.append(OctSegAccuracy('accuracy', ['freespace_accuracy', 'semantic_accuracy', 'overall_accuracy'], ['gt', 'pred'],
         'input_gt', 'output_pred', max_level, freespace_label, unknown_label, ignore_seg_label))
 
+    layers.append(DenseConvert('dense_pred', 'pred', max_level, 'output_pred'))
+    layers.append(DenseGridDataWrite('write', 'dense_pred', test_data_list_file))
 
     model.layer.extend(layers)
     return model
@@ -546,8 +568,8 @@ if __name__ == '__main__':
     
     parser.add_argument("--nlevels", type=int, default=3)
     parser.add_argument("--niter_l0", type=int, default=50)
-    parser.add_argument("--niter_l1", type=int, default=50)
-    parser.add_argument("--niter_l2", type=int, default=50)
+    parser.add_argument("--niter_l1", type=int, default=10)
+    parser.add_argument("--niter_l2", type=int, default=10)
     parser.add_argument("--sig", type=float, default=0.2)
     parser.add_argument("--tau", type=float, default=0.2)
     parser.add_argument("--lam", type=float, default=1.0)

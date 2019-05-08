@@ -5,7 +5,7 @@ from random import shuffle
    
 def main(generate_gt):
 
-	d = '/media/root/data/scans_test/'
+	d = '/media/root/data/scans_val/'
 	scenes = sorted(glob.glob(os.path.join(d, 'scene*')))
 
 	print(len(scenes))
@@ -23,7 +23,7 @@ def main(generate_gt):
 			test_list.extend(datacost_paths)
 	
 
-	with open('./test_datacost_oct.txt','w') as fid:
+	with open('./val_datacost_oct.txt','w') as fid:
 		for datacost_path in test_list:
 			fid.write(datacost_path)
 			fid.write('\n')
@@ -48,5 +48,5 @@ def main(generate_gt):
 
 
 if __name__ == '__main__':
-	generate_gt = False
+	generate_gt = True
 	main(generate_gt)
